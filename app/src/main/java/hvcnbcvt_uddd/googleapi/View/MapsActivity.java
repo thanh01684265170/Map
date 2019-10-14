@@ -34,15 +34,20 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,6 +87,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+//            mMap.setMyLocationEnabled(true);
+//            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        } else {
+            Toast.makeText(this, "chưa có permisson", Toast.LENGTH_LONG).show();
+        }
 //        Cấp quyền truy cập với api 23 trở lên
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
@@ -135,7 +149,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
-
 
     private void Controls() {
         edt_findAway = (EditText) findViewById(R.id.edt_findAway);
@@ -231,7 +244,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location myLocation = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
 
         if (myLocation == null) {
             Criteria criteria = new Criteria();
@@ -438,7 +451,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+                == PackageManager.PERMISSION_GRANTED) {
 
             // Thông báo cho người dùng biết
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,

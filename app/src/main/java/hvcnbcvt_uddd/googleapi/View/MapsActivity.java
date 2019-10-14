@@ -88,23 +88,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
-        //Tạo Progress Bar
-        myProgressDialog = new ProgressDialog(this);
-        myProgressDialog.setTitle("Đang tải Map ...");
-        myProgressDialog.setMessage("Vui lòng chờ...");
-        myProgressDialog.setCancelable(true);
-        //Hiển thị Progress Bar
-        myProgressDialog.show();
-        //Lấy đối tượng Google Map ra:
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        //thiết lập sự kiện đã tải Map thành công
-        mapFragment.getMapAsync(this);
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+            //Tạo Progress Bar
+            myProgressDialog = new ProgressDialog(this);
+            myProgressDialog.setTitle("Đang tải Map ...");
+            myProgressDialog.setMessage("Vui lòng chờ...");
+            myProgressDialog.setCancelable(true);
+            //Hiển thị Progress Bar
+            myProgressDialog.show();
+            //Lấy đối tượng Google Map ra:
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            //thiết lập sự kiện đã tải Map thành công
+            mapFragment.getMapAsync(this);
 
-        Controls();
-        Events();
-        arrayMarker = addAddMarker.getArrayMarker();
-        RightLocation();
+            Controls();
+            Events();
+            arrayMarker = addAddMarker.getArrayMarker();
+            RightLocation();
+        }
     }
 
     private void Events() {

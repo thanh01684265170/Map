@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -34,20 +35,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -87,36 +83,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                        PackageManager.PERMISSION_GRANTED) {
-//            mMap.setMyLocationEnabled(true);
-//            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        } else {
-            Toast.makeText(this, "chưa có permisson", Toast.LENGTH_LONG).show();
-        }
+
 //        Cấp quyền truy cập với api 23 trở lên
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
-        //Tạo Progress Bar
-        myProgressDialog = new ProgressDialog(this);
-        myProgressDialog.setTitle("Đang tải Map ...");
-        myProgressDialog.setMessage("Vui lòng chờ...");
-        myProgressDialog.setCancelable(true);
-        //Hiển thị Progress Bar
-        myProgressDialog.show();
-        //Lấy đối tượng Google Map ra:
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        //thiết lập sự kiện đã tải Map thành công
-        mapFragment.getMapAsync(this);
-
-        Controls();
-        Events();
-        arrayMarker = addAddMarker.getArrayMarker();
-        RightLocation();
 
     }
 
@@ -447,11 +418,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "ok", Toast.LENGTH_LONG).show();
+            //Tạo Progress Bar
+            myProgressDialog = new ProgressDialog(this);
+            myProgressDialog.setTitle("Đang tải Map ...");
+            myProgressDialog.setMessage("Vui lòng chờ...");
+            myProgressDialog.setCancelable(true);
+            //Hiển thị Progress Bar
+            myProgressDialog.show();
+            //Lấy đối tượng Google Map ra:
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            //thiết lập sự kiện đã tải Map thành công
+            mapFragment.getMapAsync(this);
+
+            Controls();
+            Events();
+            arrayMarker = addAddMarker.getArrayMarker();
+            RightLocation();
+        } else {
+            Toast.makeText(this, "chưa có permisson", Toast.LENGTH_LONG).show();
+        }
+    }
+
     //Check vị trí
     public boolean checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED) {
 
             // Thông báo cho người dùng biết
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,

@@ -14,11 +14,6 @@ import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -26,8 +21,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
@@ -83,7 +81,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_main);
 
 //        Cấp quyền truy cập với api 23 trở lên
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -114,18 +112,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void Events() {
-        edt_findAway.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                            .build(MapsActivity.this);
-                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-                } catch (GooglePlayServicesRepairableException e) {
-                } catch (GooglePlayServicesNotAvailableException e) {
-                }
-            }
-        });
+//        edt_findAway.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                try {
+//                    Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+//                            .build(MapsActivity.this);
+//                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+//                } catch (GooglePlayServicesRepairableException e) {
+//                } catch (GooglePlayServicesNotAvailableException e) {
+//                }
+//            }
+//        });
 
         img_gps.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,22 +132,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        img_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MapsActivity.this, ARActivity.class);
-                startActivity(intent);
-            }
-        });
+//        img_camera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(MapsActivity.this, ARActivity.class);
+//                startActivity(intent);
+//            }
+//        });
     }
 
     private void Controls() {
-        edt_findAway = (EditText) findViewById(R.id.edt_findAway);
-        tv_Distance = (TextView) findViewById(R.id.tv_Distance);
-        tv_Duration = (TextView) findViewById(R.id.tv_Duration);
-        img_gps = (ImageView) findViewById(R.id.img_gps);
-        img_compass = (ImageView) findViewById(R.id.img_compass);
-        img_camera = (ImageView) findViewById(R.id.img_camera);
+//        edt_findAway = (EditText) findViewById(R.id.edt_findAway);
+//        tv_Distance = (TextView) findViewById(R.id.tv_Distance);
+//        tv_Duration = (TextView) findViewById(R.id.tv_Duration);
+//        img_gps = (ImageView) findViewById(R.id.img_gps);
+        img_gps = findViewById(R.id.img_gps);
+//        img_compass = (ImageView) findViewById(R.id.img_compass);
+//        img_camera = (ImageView) findViewById(R.id.img_camera);
     }
 
 
@@ -160,7 +159,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
-                edt_findAway.setText(place.getName());
+//                edt_findAway.setText(place.getName());
                 mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName().toString()).snippet("Nơi bạn đến."));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 17));
 
@@ -251,6 +250,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             //Hiệu ứng quay camera về vị trí hiện tại
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15), 1500, null);
+            mMap.addCircle(new CircleOptions()
+                    .center(userLocation)
+                    .radius(400)
+                    .strokeWidth(0f)
+                    .fillColor(Color.argb(100, 152, 251, 152)));
+            mMap.addMarker(new MarkerOptions().position(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_dot)));
+            mMap.setMyLocationEnabled(false);
         }
 
     }

@@ -8,6 +8,43 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:878141320088:android:aa93092dc6012807d719ed",
+        "android_client_info": {
+          "package_name": "com.google.firebase.quickstart.fcm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878141320088-6m9f5hf9ieqttiv7kv246b64kcn8ghle.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.google.firebase.quickstart.fcm",
+            "certificate_hash": "9af0a26604def6b507cc21c62972bce06e9e119a"
+          }
+        },
+        {
+          "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4CxkQL2UTt9sIBSJrIgJg3fT2Di9mWIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:878141320088:android:b10d389ef6b5ecbbd719ed",
         "android_client_info": {
           "package_name": "com.sunasterisk.sunmarket"
@@ -37,12 +74,94 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:878141320088:android:8fd44a7e531513d3d719ed",
+        "android_client_info": {
+          "package_name": "com.sunasterisk.sunmarket.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878141320088-tm9mfq5s97r3p7fmh3s74c0l8ic2bml8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sunasterisk.sunmarket.debug",
+            "certificate_hash": "9af0a26604def6b507cc21c62972bce06e9e119a"
+          }
+        },
+        {
+          "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4CxkQL2UTt9sIBSJrIgJg3fT2Di9mWIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878141320088:android:b7d9b2604bd1b12fd719ed",
+        "android_client_info": {
+          "package_name": "com.sunasterisk.sunmarket.debugStaging"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878141320088-4a7a7o22tghtcht1n16b7ai1c1l9gfve.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sunasterisk.sunmarket.debugStaging",
+            "certificate_hash": "9af0a26604def6b507cc21c62972bce06e9e119a"
+          }
+        },
+        {
+          "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4CxkQL2UTt9sIBSJrIgJg3fT2Di9mWIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:878141320088:android:f4aac607af3631d4d719ed",
         "android_client_info": {
           "package_name": "hvcnbcvt_uddd.googleapi"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "878141320088-volenfr73mvoki7sj5ngsjlk3gsq7988.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "hvcnbcvt_uddd.googleapi",
+            "certificate_hash": "9af0a26604def6b507cc21c62972bce06e9e119a"
+          }
+        },
         {
           "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
           "client_type": 3

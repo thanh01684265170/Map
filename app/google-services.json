@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "878141320088",
+    "firebase_url": "https://alibaba-f38e2.firebaseio.com",
+    "project_id": "alibaba-f38e2",
+    "storage_bucket": "alibaba-f38e2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878141320088:android:b10d389ef6b5ecbbd719ed",
+        "android_client_info": {
+          "package_name": "com.sunasterisk.sunmarket"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4CxkQL2UTt9sIBSJrIgJg3fT2Di9mWIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878141320088:android:f4aac607af3631d4d719ed",
+        "android_client_info": {
+          "package_name": "hvcnbcvt_uddd.googleapi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4CxkQL2UTt9sIBSJrIgJg3fT2Di9mWIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878141320088-b1tktipppjomn4pia59cshib4p4173bm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

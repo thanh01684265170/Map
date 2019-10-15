@@ -6,6 +6,7 @@ import android.content.Context;
 import android.hardware.Camera;
 import android.opengl.Matrix;
 import android.os.Build;
+import android.util.Size;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -27,6 +28,7 @@ public class ARCamera extends ViewGroup implements SurfaceHolder.Callback {
     List<Camera.Size> supportedPreviewSizes;
     Camera camera;
     Camera.Parameters parameters;
+
     Activity activity;
 
     float[] projectionMatrix = new float[16];
@@ -208,8 +210,22 @@ public class ARCamera extends ViewGroup implements SurfaceHolder.Callback {
             this.cameraHeight = height;
 
             Camera.Parameters params = camera.getParameters();
-            params.setPreviewSize(previewSize.width, previewSize.height);
+            List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
+//            params.setPreviewSize(sizes.get(0).width, sizes.get(0).height);
             requestLayout();
+
+
+
+            Camera.Size bestSize = null;
+            List<Camera.Size> sizeList = camera.getParameters().getSupportedPreviewSizes();
+            bestSize = sizeList.get(0);
+            for(int i = 1; i < sizeList.size(); i++){
+                if((sizeList.get(i).width * sizeList.get(i).height) > (bestSize.width * bestSize.height)){
+                    bestSize = sizeList.get(i);
+                }
+            }
+
+            params.setPictureSize(bestSize.width, bestSize.height);
 
             camera.setParameters(params);
             camera.startPreview();

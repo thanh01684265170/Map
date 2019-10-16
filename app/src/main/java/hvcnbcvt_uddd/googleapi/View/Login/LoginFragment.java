@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -119,6 +120,7 @@ public class LoginFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onResponse(Call call, Response response) {
+                Log.d("Chinh", "onResponse");
                 if (response.isSuccessful()) {
                     LoginResponse loginResponse = (LoginResponse) response.body();
                     handleLoginRequest(loginResponse);
@@ -128,6 +130,7 @@ public class LoginFragment extends Fragment {
 
             @Override
             public void onFailure(Call call, Throwable t) {
+                Log.d("Chinh", "onFailure: " + t.toString());
                 onLoginFailed();
                 progressDialog.dismiss();
             }
@@ -137,8 +140,10 @@ public class LoginFragment extends Fragment {
     private void handleLoginRequest(LoginResponse loginResponse) {
 //        String a = loginResponse.getMessage();
 //        Toast.makeText(getContext(), a, Toast.LENGTH_LONG).show();
+        btnLogin.setEnabled(true);
+
         if (loginResponse.getMessage().equals("Sign in successfully")) {
-            User user_login = loginResponse.getData().getUser().get(0);
+            User user_login = loginResponse.getData().getUser();
             new insertAsyncTask(loginDao).execute(user_login);
 
             Toast.makeText(getContext(), loginResponse.getMessage(), Toast.LENGTH_LONG).show();

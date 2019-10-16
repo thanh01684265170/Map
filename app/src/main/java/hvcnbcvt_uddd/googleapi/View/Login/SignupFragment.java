@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.fragment.app.Fragment;
 
 import hvcnbcvt_uddd.googleapi.R;
@@ -33,6 +34,7 @@ public class SignupFragment extends Fragment {
     EditText editRePassWord;
     Button btnSignUp;
     TextView txtLogin;
+    AppCompatSpinner spinnerGender;
 
     public static SignupFragment newInstance() {
         if (instance == null) {
@@ -169,5 +171,6 @@ public class SignupFragment extends Fragment {
         editRePassWord = view.findViewById(R.id.input_reEnterPassword);
         btnSignUp = view.findViewById(R.id.btn_signup);
         txtLogin = view.findViewById(R.id.link_login);
+        spinnerGender = view.findViewById(R.id.spinner_gender);
     }
 }

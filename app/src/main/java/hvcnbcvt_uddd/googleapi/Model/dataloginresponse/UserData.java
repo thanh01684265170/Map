@@ -7,13 +7,13 @@ import com.google.gson.annotations.SerializedName;
 public class UserData {
 
     @SerializedName("user")
-    private List<User> mUser;
+    private User mUser;
 
-    public List<User> getUser() {
+    public User getUser() {
         return mUser;
     }
 
-    public void setUser(List<User> user) {
+    public void setUser(User user) {
         mUser = user;
     }
 

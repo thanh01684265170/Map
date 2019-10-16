@@ -40,7 +40,7 @@ public class GetDirections extends
         try {
             if (exception == null && result != null && result.size() > 0
                     && activity != null) {
-                activity.get().handleGetDirectionsResult(result);
+//                activity.get().handleGetDirectionsResult(result);
             } else {
                 processException();
             }

@@ -14,11 +14,9 @@ import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,7 +25,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,20 +33,34 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.Dash;
+import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.DirectionsLeg;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.DirectionsStep;
+import com.google.maps.model.EncodedPolyline;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
-import hvcnbcvt_uddd.googleapi.Control.Direction;
-import hvcnbcvt_uddd.googleapi.Control.GetDirections;
-import hvcnbcvt_uddd.googleapi.Control.GetDistance;
 import hvcnbcvt_uddd.googleapi.Model.MarkerManage;
 import hvcnbcvt_uddd.googleapi.R;
 
@@ -58,15 +69,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private ProgressDialog myProgressDialog;
-    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 23487;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    public static final int PATTERN_DASH_LENGTH_PX = 20;
+    public static final int PATTERN_GAP_LENGTH_PX = 20;
+    public static final PatternItem DASH = new Dash(PATTERN_DASH_LENGTH_PX);
+    public static final PatternItem GAP = new Gap(PATTERN_GAP_LENGTH_PX);
+    public static final List<PatternItem> PATTERN_POLYGON_ALPHA = Arrays.asList(GAP, DASH);
+
     private static LatLng PLACE_YOU_GO;
     private Polyline newPolyline;
     private LatLngBounds latlngBounds;
+    private Marker marker = null;
+    private Circle circle = null;
 
     private EditText edt_findAway;
-    private TextView tv_Distance, tv_Duration;
-    private ImageView img_gps, img_compass, img_camera;
+    private ImageView img_gps;
     private float distance;
 
     //Xử lý playmedia
@@ -87,6 +105,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
+        // Khởi tạo google autocomplete
+        if (!Places.isInitialized()) {
+            Locale.setDefault(new Locale("vi", "vn"));
+            Places.initialize(getApplicationContext(), getString(R.string.maps_api_key), Locale.getDefault());
+        }
+
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
@@ -112,18 +136,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void Events() {
-//        edt_findAway.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                try {
-//                    Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-//                            .build(MapsActivity.this);
-//                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-//                } catch (GooglePlayServicesRepairableException e) {
-//                } catch (GooglePlayServicesNotAvailableException e) {
-//                }
-//            }
-//        });
+        edt_findAway.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
+                Intent intent = new Autocomplete.IntentBuilder(
+                        AutocompleteActivityMode.FULLSCREEN, fields).setCountry("VN")
+                        .build(MapsActivity.this);
+                startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+            }
+        });
 
         img_gps.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,23 +154,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-//        img_camera.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(MapsActivity.this, ARActivity.class);
-//                startActivity(intent);
-//            }
-//        });
     }
 
     private void Controls() {
-//        edt_findAway = (EditText) findViewById(R.id.edt_findAway);
-//        tv_Distance = (TextView) findViewById(R.id.tv_Distance);
-//        tv_Duration = (TextView) findViewById(R.id.tv_Duration);
-//        img_gps = (ImageView) findViewById(R.id.img_gps);
+        edt_findAway = findViewById(R.id.edt_search);
         img_gps = findViewById(R.id.img_gps);
-//        img_compass = (ImageView) findViewById(R.id.img_compass);
-//        img_camera = (ImageView) findViewById(R.id.img_camera);
     }
 
 
@@ -158,14 +168,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-//                edt_findAway.setText(place.getName());
-                mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName().toString()).snippet("Nơi bạn đến."));
+                if (marker != null) {
+                    marker.remove();
+                }
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                edt_findAway.setText(place.getName());
+                marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName().toString()).snippet("Nơi bạn đến."));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 17));
 
                 //Set vị trí vừa tìm được
                 PLACE_YOU_GO = new LatLng(place.getLatLng().latitude, place.getLatLng().longitude);
-
                 LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                 @SuppressLint("MissingPermission") Location myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
@@ -178,17 +190,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
                 if (myLocation != null && PLACE_YOU_GO != null) {
-                    findDirections(myLocation.getLatitude(), myLocation.getLongitude(),
-                            PLACE_YOU_GO.latitude, PLACE_YOU_GO.longitude,
-                            Direction.MODE_DRIVING);
+                    findAway(myLocation.getLatitude(), myLocation.getLongitude(),
+                            PLACE_YOU_GO.latitude, PLACE_YOU_GO.longitude);
                 }
 
                 //Hiển thị vùng bao quanh 2 điểm để hiển thị đủ trong màn hình
                 LatLng userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
                 latlngBounds = createLatLngBoundsObject(userLocation, PLACE_YOU_GO);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
-                        latlngBounds, 400, 400, 80));
-                mMap.setMyLocationEnabled(true);
+                        latlngBounds, 800, 500, 50));
+//                mMap.setMyLocationEnabled(true);
 
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
@@ -198,6 +209,72 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+
+    public void findAway(double fromPositionDoubleLat,
+                         double fromPositionDoubleLong, double toPositionDoubleLat,
+                         double toPositionDoubleLong) {
+
+        List<LatLng> path = new ArrayList();
+
+        GeoApiContext context = new GeoApiContext.Builder()
+                .apiKey(getResources().getString(R.string.maps_api_key))
+                .build();
+        String start = fromPositionDoubleLat + "," + fromPositionDoubleLong;
+        String end = toPositionDoubleLat + "," + toPositionDoubleLong;
+        DirectionsApiRequest req = DirectionsApi.getDirections(context, start, end);
+        try {
+            DirectionsResult res = req.await();
+
+            //Loop through legs and steps to get encoded polylines of each step
+            if (res.routes != null && res.routes.length > 0) {
+                DirectionsRoute route = res.routes[0];
+
+                if (route.legs != null) {
+                    for (int i = 0; i < route.legs.length; i++) {
+                        DirectionsLeg leg = route.legs[i];
+                        if (leg.steps != null) {
+                            for (int j = 0; j < leg.steps.length; j++) {
+                                DirectionsStep step = leg.steps[j];
+                                if (step.steps != null && step.steps.length > 0) {
+                                    for (int k = 0; k < step.steps.length; k++) {
+                                        DirectionsStep step1 = step.steps[k];
+                                        EncodedPolyline points1 = step1.polyline;
+                                        if (points1 != null) {
+                                            //Decode polyline and add points to list of route coordinates
+                                            List<com.google.maps.model.LatLng> coords1 = points1.decodePath();
+                                            for (com.google.maps.model.LatLng coord1 : coords1) {
+                                                path.add(new LatLng(coord1.lat, coord1.lng));
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    EncodedPolyline points = step.polyline;
+                                    if (points != null) {
+                                        //Decode polyline and add points to list of route coordinates
+                                        List<com.google.maps.model.LatLng> coords = points.decodePath();
+                                        for (com.google.maps.model.LatLng coord : coords) {
+                                            path.add(new LatLng(coord.lat, coord.lng));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+
+        }
+
+        //Vẽ đường đi từ điểm đầu đến điểm cuối
+        if (path.size() > 0) {
+            if (newPolyline != null) {
+                newPolyline.remove();
+            }
+            PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.BLUE).width(10).pattern(PATTERN_POLYGON_ALPHA);
+            newPolyline = mMap.addPolyline(opts);
+        }
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -249,50 +326,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (myLocation != null) {
             LatLng userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             //Hiệu ứng quay camera về vị trí hiện tại
+            if (circle != null) {
+                circle.remove();
+            }
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15), 1500, null);
-            mMap.addCircle(new CircleOptions()
+            circle = mMap.addCircle(new CircleOptions()
                     .center(userLocation)
                     .radius(400)
                     .strokeWidth(0f)
-                    .fillColor(Color.argb(100, 152, 251, 152)));
-            mMap.addMarker(new MarkerOptions().position(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()))
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_dot)));
-            mMap.setMyLocationEnabled(false);
+                    .fillColor(Color.argb(100, 135, 206, 235)));
+//            mMap.addMarker(new MarkerOptions().position(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()))
+//                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_dot1)));
+            mMap.setMyLocationEnabled(true);
         }
 
     }
-
-    // in ra khoang cach
-    public void getDistance(Integer distance) {
-        float dis;
-        dis = ((float) Math.round((((float) distance) / 1000) * 10)) / 10;
-        tv_Distance.setText(dis + " km");
-        int h = (int) (dis / 40);
-        int m = Math.round(((dis / 40) - (float) h) * 60);
-        if (h > 0) {
-            if (m > 0)
-                tv_Duration.setText(h + " giờ " + m + " phút");
-            else
-                tv_Duration.setText(h + " giờ");
-        } else {
-            tv_Duration.setText(m + " phút");
-        }
-    }
-
-    //Vẽ đường đi từ điểm đầu đến điểm cuối
-    public void handleGetDirectionsResult(ArrayList<LatLng> directionPoints) {
-        PolylineOptions rectLine = new PolylineOptions().width(5).color(
-                Color.RED);
-
-        for (int i = 0; i < directionPoints.size(); i++) {
-            rectLine.add(directionPoints.get(i));
-        }
-        if (newPolyline != null) {
-            newPolyline.remove();
-        }
-        newPolyline = mMap.addPolyline(rectLine);
-    }
-
 
     //Vẽ bản đồ chứa đủ cả 2 điểm
     private LatLngBounds createLatLngBoundsObject(LatLng firstLocation,
@@ -305,29 +353,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return null;
     }
-
-    //Tìm đường
-    public void findDirections(double fromPositionDoubleLat,
-                               double fromPositionDoubleLong, double toPositionDoubleLat,
-                               double toPositionDoubleLong, String mode) {
-        Map<String, String> map = new HashMap<String, String>();
-        map.put(GetDirections.USER_CURRENT_LAT,
-                String.valueOf(fromPositionDoubleLat));
-        map.put(GetDirections.USER_CURRENT_LONG,
-                String.valueOf(fromPositionDoubleLong));
-        map.put(GetDirections.DESTINATION_LAT,
-                String.valueOf(toPositionDoubleLat));
-        map.put(GetDirections.DESTINATION_LONG,
-                String.valueOf(toPositionDoubleLong));
-        map.put(GetDirections.DIRECTIONS_MODE, mode);
-
-        GetDirections asyncTask = new GetDirections(this);
-        asyncTask.execute(map);
-
-        GetDistance getDistance = new GetDistance(this);
-        getDistance.execute(map);
-    }
-
 
     // Lắng nghe sự thay đổi vị trí
     private void RightLocation() {
@@ -411,7 +436,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         int i = nearPoitMost();
         //Kiểm tra xem có nằm trong bán kính của điểm gần nhất ko
         if (compareLocation(arrayMarker.get(i).getLatitude(), arrayMarker.get(i).getLongitute(), 240)) {
-            Log.d("test", "kiemtra = " + check + "Trong vong");
             if (check == 0) {
                 nameCircle = i;
                 check = 1;

@@ -2,7 +2,6 @@ package hvcnbcvt_uddd.googleapi.Control;
 
 import android.os.AsyncTask;
 
-
 import com.google.android.gms.maps.model.LatLng;
 
 import org.w3c.dom.Document;
@@ -42,7 +41,7 @@ public class GetDistance extends
         try {
             if (exception == null && distance != null
                     && activity != null) {
-                activity.get().getDistance(distance);
+//                activity.get().getDistance(distance);
             } else {
                 processException();
             }

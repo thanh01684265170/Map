@@ -26,25 +26,18 @@
             android:inputType="textPersonName"
             android:hint="Name" />
 
-        <!-- Address Label -->
+        <!--  Email Label -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp">
-            <EditText android:id="@+id/input_address"
+            <EditText android:id="@+id/input_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPostalAddress"
-                android:hint="Address" />
+                android:inputType="textEmailAddress"
+                android:hint="Email" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <!--  Email Label -->
-        <EditText android:id="@+id/input_email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:hint="Email" />
 
         <!-- mobile number -->
         <com.google.android.material.textfield.TextInputLayout
@@ -84,6 +77,17 @@
                 android:inputType="textPassword"
                 android:hint="Re-enter Password"/>
         </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/spinner_gender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:entries="@array/gender_arrays"
+            android:prompt="@string/gender_prompt"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
 
         <!-- Signup Button -->
         <androidx.appcompat.widget.AppCompatButton

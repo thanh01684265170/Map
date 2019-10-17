@@ -49,11 +49,11 @@
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="@+id/relLayout1"
         app:layout_constraintEnd_toEndOf="@+id/relLayout1"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintStart_toEndOf="@+id/img_profile"
         app:layout_constraintTop_toTopOf="@+id/relLayout1" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/img_profile"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginStart="8dp"

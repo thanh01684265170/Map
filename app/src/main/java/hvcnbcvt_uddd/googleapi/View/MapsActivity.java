@@ -93,6 +93,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private EditText edt_findAway;
     private ImageView img_gps;
+    private ImageView imgProfile;
     private float distance;
 
     //Xử lý playmedia
@@ -147,6 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void initView() {
 
         btnSos = findViewById(R.id.button_sos);
+        imgProfile = findViewById(R.id.img_profile);
 
         apiInterface = ApiBuilder.getServiceApi(this);
     }
@@ -160,6 +162,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         AutocompleteActivityMode.FULLSCREEN, fields).setCountry("VN")
                         .build(MapsActivity.this);
                 startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+            }
+        });
+
+        imgProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MapsActivity.this, ProfileActivity.class);
+                MapsActivity.this.startActivity(intent);
             }
         });
 

@@ -88,8 +88,8 @@
                 android:layout_height="36dp"
                 android:src="@drawable/ic_phone_blue"/>
             <TextView
+                android:id="@+id/txt_user_mobile"
                 android:textStyle="bold"
-
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -180,6 +180,7 @@ public class LoginFragment extends Fragment {
 
                         HashMap<String, String> option = new HashMap<>();
                         option.put("device_token", token);
+                        Log.d(TAG, "token: " + token);
 
                         Call call = apiInterface.sendToken(option);
                         call.enqueue(new Callback() {

@@ -17,4 +17,7 @@ public interface LoginDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void saveUserLogin(User user);
+
+    @Query("SELECT * FROM user_login_table WHERE mEmail = :email")
+    User loadUserByEmail(String email);
 }

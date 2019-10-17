@@ -44,6 +44,7 @@ public class LoginFragment extends Fragment {
 
     private static LoginFragment instance = null;
     private String TAG = "LoginFragment";
+    public static final String USER_EMAIL = "USER_EMAIL";
 
     EditText editEmail;
     EditText editPassword;
@@ -52,6 +53,7 @@ public class LoginFragment extends Fragment {
     ApiInterface apiInterface;
     AppDatabase appDb;
     LoginDao loginDao;
+    PrefHelper prefHelper;
 
     public static LoginFragment newInstance() {
         if (instance == null) {
@@ -105,6 +107,8 @@ public class LoginFragment extends Fragment {
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
 
+        prefHelper.putString(USER_EMAIL, editEmail.getText().toString());
+
         loginRequest(progressDialog);
     }
 
@@ -116,8 +120,12 @@ public class LoginFragment extends Fragment {
 
         apiInterface = ApiBuilder.getServiceApi(getContext());
 
-        appDb = AppDatabase.getDatabase(getContext());
+        appDb = AppDatabase.getInstance(getContext());
         loginDao = appDb.loginDao();
+
+        prefHelper = new PrefHelper(getContext());
+        editEmail.setText(prefHelper.getString(USER_EMAIL));
+        editEmail.setSelection(editEmail.getText().length());
     }
 
     private void loginRequest(final ProgressDialog progressDialog) {
@@ -200,7 +208,6 @@ public class LoginFragment extends Fragment {
 
             Toast.makeText(getContext(), loginResponse.getMessage(), Toast.LENGTH_LONG).show();
 
-            PrefHelper prefHelper = new PrefHelper(getContext());
             prefHelper.putString(ApiBuilder.AUTHORIZATION_KEY, user_login.getId());
 
             Intent mapsActivityIntent = new Intent(getContext(), MapsActivity.class);

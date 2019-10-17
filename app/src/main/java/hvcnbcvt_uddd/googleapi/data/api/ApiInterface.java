@@ -11,4 +11,10 @@ public interface ApiInterface {
 
     @POST("sign-in")
     Call<LoginResponse> login(@Body HashMap<String, String> parameters);
+
+    @POST("device-token")
+    Call<LoginResponse> sendToken(@Body HashMap<String, String> token);
+
+    @POST("request")
+    Call<LoginResponse> requestSOS();
 }

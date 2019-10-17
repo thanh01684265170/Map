@@ -18,7 +18,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
+
 import java.util.HashMap;
+import java.util.Objects;
 
 import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
 import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.User;
@@ -28,6 +35,7 @@ import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
 import hvcnbcvt_uddd.googleapi.data.api.ApiInterface;
 import hvcnbcvt_uddd.googleapi.data.database.AppDatabase;
 import hvcnbcvt_uddd.googleapi.data.database.LoginDao;
+import hvcnbcvt_uddd.googleapi.data.database.PrefHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,6 +43,7 @@ import retrofit2.Response;
 public class LoginFragment extends Fragment {
 
     private static LoginFragment instance = null;
+    private String TAG = "LoginFragment";
 
     EditText editEmail;
     EditText editPassword;
@@ -105,7 +114,7 @@ public class LoginFragment extends Fragment {
         btnLogin = view.findViewById(R.id.btn_login);
         txtSignup = view.findViewById(R.id.link_signup);
 
-        apiInterface = ApiBuilder.getServiceApi();
+        apiInterface = ApiBuilder.getServiceApi(getContext());
 
         appDb = AppDatabase.getDatabase(getContext());
         loginDao = appDb.loginDao();
@@ -124,6 +133,7 @@ public class LoginFragment extends Fragment {
                 if (response.isSuccessful()) {
                     LoginResponse loginResponse = (LoginResponse) response.body();
                     handleLoginRequest(loginResponse);
+                    sendToken();
                 }
                 progressDialog.dismiss();
             }
@@ -137,6 +147,48 @@ public class LoginFragment extends Fragment {
         });
     }
 
+    private void sendToken() {
+        FirebaseMessaging.getInstance().subscribeToTopic("weather")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        String msg = getString(R.string.msg_subscribed);
+                        if (!task.isSuccessful()) {
+                            msg = getString(R.string.msg_subscribe_failed);
+                        }
+                    }
+                });
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+                        // Get new Instance ID token
+                        String token = Objects.requireNonNull(task.getResult()).getToken();
+
+                        HashMap<String, String> option = new HashMap<>();
+                        option.put("device_token", token);
+
+                        Call call = apiInterface.sendToken(option);
+                        call.enqueue(new Callback() {
+                            @Override
+                            public void onResponse(Call call, Response response) {
+                                Log.d(TAG, "onResponse:  send token" + response.message());
+                            }
+
+                            @Override
+                            public void onFailure(Call call, Throwable t) {
+                                Log.d(TAG, "onFailure:  send token" + t.getMessage());
+                            }
+                        });
+                    }
+                });
+    }
+
     private void handleLoginRequest(LoginResponse loginResponse) {
 //        String a = loginResponse.getMessage();
 //        Toast.makeText(getContext(), a, Toast.LENGTH_LONG).show();
@@ -147,6 +199,9 @@ public class LoginFragment extends Fragment {
             new insertAsyncTask(loginDao).execute(user_login);
 
             Toast.makeText(getContext(), loginResponse.getMessage(), Toast.LENGTH_LONG).show();
+
+            PrefHelper prefHelper = new PrefHelper(getContext());
+            prefHelper.putString(ApiBuilder.AUTHORIZATION_KEY, user_login.getId());
 
             Intent mapsActivityIntent = new Intent(getContext(), MapsActivity.class);
             startActivity(mapsActivityIntent);

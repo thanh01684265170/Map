@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -62,10 +63,16 @@ import java.util.Locale;
 
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
 import hvcnbcvt_uddd.googleapi.Model.MarkerManage;
+import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
 import hvcnbcvt_uddd.googleapi.R;
+import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
+import hvcnbcvt_uddd.googleapi.data.api.ApiInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener {
 
     private GoogleMap mMap;
     private ProgressDialog myProgressDialog;
@@ -94,13 +101,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList<MarkerManage> arrayMarker;
     AddMarker addAddMarker = new AddMarker();
     MediaPlayer mediaPlayer;
-
+    ApiInterface apiInterface;
+    View btnSos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        initView();
 //        Cấp quyền truy cập với api 23 trở lên
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
@@ -135,6 +143,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    private void initView() {
+
+        btnSos = findViewById(R.id.button_sos);
+
+        apiInterface = ApiBuilder.getServiceApi(this);
+    }
+
     private void Events() {
         edt_findAway.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,7 +168,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 getDeviceLocation();
             }
         });
+        btnSos.setOnClickListener(this);
+    }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.button_sos:
+                sendSos();
+            default:
+                break;
+        }
+    }
+
+    private void sendSos() {
+        apiInterface.requestSOS().enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                Log.d("MapsACtivityyy", "onResponse: ");
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Log.d("MapsACtivityyy", "onFailure: ");
+            }
+        });
     }
 
     private void Controls() {

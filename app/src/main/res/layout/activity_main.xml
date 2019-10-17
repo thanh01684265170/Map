@@ -81,7 +81,7 @@
         android:layout_marginTop="4dp"
         android:elevation="5dp"
         android:src="@drawable/ic_gps"
-        app:layout_constraintEnd_toStartOf="@+id/view3"
+        app:layout_constraintEnd_toStartOf="@+id/button_sos"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/view" />
 
@@ -94,13 +94,13 @@
         android:textColor="#fff"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/view3"
-        app:layout_constraintEnd_toEndOf="@id/view3"
-        app:layout_constraintStart_toStartOf="@id/view3"
-        app:layout_constraintTop_toTopOf="@id/view3" />
+        app:layout_constraintBottom_toBottomOf="@id/button_sos"
+        app:layout_constraintEnd_toEndOf="@id/button_sos"
+        app:layout_constraintStart_toStartOf="@id/button_sos"
+        app:layout_constraintTop_toTopOf="@id/button_sos" />
 
     <View
-        android:id="@+id/view3"
+        android:id="@+id/button_sos"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:background="@drawable/ic_sos"
@@ -126,7 +126,7 @@
         android:elevation="5dp"
         android:src="@drawable/ic_send"
         app:layout_constraintEnd_toEndOf="@+id/view"
-        app:layout_constraintStart_toEndOf="@+id/view3"
+        app:layout_constraintStart_toEndOf="@+id/button_sos"
         app:layout_constraintTop_toTopOf="@+id/view" />
 
     <TextView

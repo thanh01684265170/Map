@@ -13,6 +13,10 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="gender_prompt">Choose Gender</string>
+    <string name="radio_normal">Normal</string>
+    <string name="radio_danger">Danger</string>
+    <string name="radio_very_dangerous">Very dangerous</string>
+    <string name="btn_send">Send</string>
     <string-array name="gender_arrays">
         <item>Male</item>
         <item>Female</item>

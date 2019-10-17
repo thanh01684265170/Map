@@ -89,6 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLngBounds latlngBounds;
     private Marker marker = null;
     private Circle circle = null;
+    private Location myLocation;
 
     private EditText edt_findAway;
     private ImageView img_gps;
@@ -116,7 +117,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Khởi tạo google autocomplete
         if (!Places.isInitialized()) {
             Locale.setDefault(new Locale("vi", "vn"));
-            Places.initialize(getApplicationContext(), getString(R.string.maps_api_key), Locale.getDefault());
+            Places.initialize(getApplicationContext(), getString(R.string.google_maps_key), Locale.getDefault());
         }
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -218,15 +219,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //Set vị trí vừa tìm được
                 PLACE_YOU_GO = new LatLng(place.getLatLng().latitude, place.getLatLng().longitude);
                 LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                @SuppressLint("MissingPermission") Location myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-
-                if (myLocation == null) {
-                    Criteria criteria = new Criteria();
-                    criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-                    String provider = lm.getBestProvider(criteria, true);
-                    myLocation = lm.getLastKnownLocation(provider);
-                }
 
                 if (myLocation != null && PLACE_YOU_GO != null) {
                     findAway(myLocation.getLatitude(), myLocation.getLongitude(),
@@ -256,7 +248,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         List<LatLng> path = new ArrayList();
 
         GeoApiContext context = new GeoApiContext.Builder()
-                .apiKey(getResources().getString(R.string.maps_api_key))
+                .apiKey(getResources().getString(R.string.google_maps_key))
                 .build();
         String start = fromPositionDoubleLat + "," + fromPositionDoubleLong;
         String end = toPositionDoubleLat + "," + toPositionDoubleLong;
@@ -352,7 +344,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location myLocation = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+        myLocation = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
 
         if (myLocation == null) {
             Criteria criteria = new Criteria();

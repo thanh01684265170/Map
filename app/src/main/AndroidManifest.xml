@@ -42,11 +42,11 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="@string/maps_api_key" />
+            android:value="@string/google_maps_key" />
 
         <meta-data
             android:name="com.google.android.places.API_KEY"
-            android:value="@string/maps_api_key" />
+            android:value="@string/google_maps_key" />
         <service
             android:name=".View.MyFirebaseMessagingService"
             android:exported="false">

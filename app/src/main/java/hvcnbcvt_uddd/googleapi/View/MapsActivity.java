@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -58,15 +59,17 @@ import com.google.maps.model.EncodedPolyline;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
+import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.MarkerManage;
-import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
 import hvcnbcvt_uddd.googleapi.R;
 import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
 import hvcnbcvt_uddd.googleapi.data.api.ApiInterface;
+import hvcnbcvt_uddd.googleapi.data.database.PrefHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -104,12 +107,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     MediaPlayer mediaPlayer;
     ApiInterface apiInterface;
     View btnSos;
+    TextView textStatusButton;
+
+    PrefHelper prefHelper;
+    ImageView buttonSendHelp;
+    String lat = "";
+    String lon = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+
+        lat = getIntent().getStringExtra("LAT");
+        lon = getIntent().getStringExtra("LON");
+        System.out.println("" + lat + lon);
+
 //        Cấp quyền truy cập với api 23 trở lên
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
@@ -145,8 +159,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void initView() {
-
+        prefHelper = new PrefHelper(this);
         btnSos = findViewById(R.id.button_sos);
+        textStatusButton = findViewById(R.id.textStatus);
+        buttonSendHelp = findViewById(R.id.img_send);
 
         apiInterface = ApiBuilder.getServiceApi(this);
     }
@@ -170,27 +186,70 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         btnSos.setOnClickListener(this);
+        buttonSendHelp.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_sos:
-                sendSos();
+                sosClick();
+                break;
+            case R.id.img_send:
+                openSOSRequestActivity();
+                break;
             default:
                 break;
         }
     }
 
-    private void sendSos() {
-        apiInterface.requestSOS().enqueue(new Callback<LoginResponse>() {
+    private void openSOSRequestActivity() {
+        Intent sosHelpActivityIntent = new Intent(this, SOSRequestActivity.class);
+        startActivity(sosHelpActivityIntent);
+    }
+
+    private void sosClick() {
+        if (textStatusButton.getText().equals("SOS")) {
+            sendRequestSos();
+            textStatusButton.setText("CANCEL");
+        } else {
+            sendSosCancel();
+            textStatusButton.setText("SOS");
+        }
+    }
+
+    private void sendRequestSos() {
+        HashMap<String, Double> option = new HashMap<>();
+        option.put("latitude", myLocation.getLatitude());
+        option.put("longitude", myLocation.getLongitude());
+
+        apiInterface.requestSOS(option).enqueue(new Callback<DataSos>() {
             @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+            public void onResponse(Call<DataSos> call, Response<DataSos> response) {
                 Log.d("MapsACtivityyy", "onResponse: ");
+                Toast.makeText(getApplicationContext(), response.body().getMessage(), Toast.LENGTH_LONG).show();
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onFailure(Call<DataSos> call, Throwable t) {
+                Log.d("MapsACtivityyy", "onFailure: ");
+            }
+        });
+    }
+
+    private void sendSosCancel() {
+        String entityId = prefHelper.getString("AUTHORIZATION_KEY");
+        HashMap<String, String> option = new HashMap<>();
+        option.put("entityId", entityId);
+        apiInterface.cancelSOS(option).enqueue(new Callback<DataSos>() {
+            @Override
+            public void onResponse(Call<DataSos> call, Response<DataSos> response) {
+                Log.d("MapsACtivityyy", "onResponse: ");
+                Toast.makeText(getApplicationContext(), response.body().getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Call<DataSos> call, Throwable t) {
                 Log.d("MapsACtivityyy", "onFailure: ");
             }
         });

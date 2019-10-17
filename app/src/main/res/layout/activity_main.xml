@@ -40,9 +40,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
         android:background="@null"
         android:elevation="10dp"
         android:hint="Enter address you want go"
@@ -86,13 +84,13 @@
         app:layout_constraintTop_toTopOf="@+id/view" />
 
     <TextView
-        android:id="@+id/textStatus"
+        android:id="@+id/txt_sos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:elevation="6dp"
         android:text="SOS"
         android:textColor="#fff"
-        android:textSize="14sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/button_sos"
         app:layout_constraintEnd_toEndOf="@id/button_sos"

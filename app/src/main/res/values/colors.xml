@@ -9,4 +9,13 @@
     <color name="red">#DD2C00</color>
     <color name="green">#64DD17</color>
     <color name="transperent">#00FFFEFE</color>
+
+    <!--Profile-->
+    <color name="graylight">#fafafa</color>
+    <color name="startblue">#09c6df</color>
+    <color name="endblue">#0bcce6</color>
+
+    <color name="green_dark">#32cb00</color>
+    <color name="yellow_dark">#c7cc00</color>
+    <color name="red_dark">#c30000</color>
 </resources>

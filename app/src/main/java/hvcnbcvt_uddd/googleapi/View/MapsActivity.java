@@ -6,7 +6,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -22,16 +24,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -66,7 +73,9 @@ import java.util.Locale;
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.MarkerManage;
+import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
 import hvcnbcvt_uddd.googleapi.R;
+import hvcnbcvt_uddd.googleapi.View.adapter.MarkerInfoWindowAdapter;
 import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
 import hvcnbcvt_uddd.googleapi.data.api.ApiInterface;
 import hvcnbcvt_uddd.googleapi.data.database.PrefHelper;
@@ -75,7 +84,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private ProgressDialog myProgressDialog;
@@ -96,8 +105,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private EditText edt_findAway;
     private ImageView img_gps;
-    private ImageView imgProfile;
+    private TextView txt_sos;
+    private View btnSos;
     private float distance;
+
 
     //Xử lý playmedia
     int check = 0;
@@ -107,9 +118,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     AddMarker addAddMarker = new AddMarker();
     MediaPlayer mediaPlayer;
     ApiInterface apiInterface;
-    View btnSos;
-    TextView textStatusButton;
-
     PrefHelper prefHelper;
     ImageView buttonSendHelp;
     String lat = "";
@@ -124,6 +132,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         lat = getIntent().getStringExtra("LAT");
         lon = getIntent().getStringExtra("LON");
         System.out.println("" + lat + lon);
+
 
 //        Cấp quyền truy cập với api 23 trở lên
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -152,7 +161,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //thiết lập sự kiện đã tải Map thành công
             mapFragment.getMapAsync(this);
 
-            Controls();
             Events();
             arrayMarker = addAddMarker.getArrayMarker();
             RightLocation();
@@ -160,50 +168,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void initView() {
-        prefHelper = new PrefHelper(this);
-        btnSos = findViewById(R.id.button_sos);
-        textStatusButton = findViewById(R.id.textStatus);
         buttonSendHelp = findViewById(R.id.img_send);
-        imgProfile = findViewById(R.id.img_profile);
-
+        prefHelper = new PrefHelper(this);
+        edt_findAway = findViewById(R.id.edt_search);
+        img_gps = findViewById(R.id.img_gps);
+        btnSos = findViewById(R.id.button_sos);
+        txt_sos = findViewById(R.id.txt_sos);
         apiInterface = ApiBuilder.getServiceApi(this);
     }
 
     private void Events() {
-        edt_findAway.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
-                Intent intent = new Autocomplete.IntentBuilder(
-                        AutocompleteActivityMode.FULLSCREEN, fields).setCountry("VN")
-                        .build(MapsActivity.this);
-                startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-            }
-        });
-
-        imgProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MapsActivity.this, ProfileActivity.class);
-                MapsActivity.this.startActivity(intent);
-            }
-        });
-
-        img_gps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getDeviceLocation();
-            }
-        });
-        btnSos.setOnClickListener(this);
         buttonSendHelp.setOnClickListener(this);
+        edt_findAway.setOnClickListener(this);
+        img_gps.setOnClickListener(this);
+        btnSos.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_sos:
-                sosClick();
+                sendSos();
+                break;
+            case R.id.edt_search:
+                searchPlace();
+                break;
+            case R.id.img_gps:
+                getDeviceLocation();
                 break;
             case R.id.img_send:
                 openSOSRequestActivity();
@@ -216,16 +207,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void openSOSRequestActivity() {
         Intent sosHelpActivityIntent = new Intent(this, SOSRequestActivity.class);
         startActivity(sosHelpActivityIntent);
-    }
-
-    private void sosClick() {
-        if (textStatusButton.getText().equals("SOS")) {
-            sendRequestSos();
-            textStatusButton.setText("CANCEL");
-        } else {
-            sendSosCancel();
-            textStatusButton.setText("SOS");
-        }
     }
 
     private void sendRequestSos() {
@@ -247,6 +228,74 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    private void searchPlace() {
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
+        Intent intent = new Autocomplete.IntentBuilder(
+                AutocompleteActivityMode.FULLSCREEN, fields).setCountry("VN")
+                .build(MapsActivity.this);
+        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+    }
+
+    //Handle noti
+    private void sendSos() {
+        if (txt_sos.getText().equals("SOS")) {
+            sendRequestSos();
+            txt_sos.setText("Cancel");
+            //change color cricle
+            if (circle != null) {
+                circle.remove();
+            }
+            final LatLng userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15), 1500, null);
+            circle = mMap.addCircle(new CircleOptions()
+                    .center(userLocation)
+                    .radius(500)
+                    .strokeWidth(0f)
+                    .fillColor(Color.argb(100, 250, 128, 114)));
+
+            //Custom Popup marker
+            MarkerInfoWindowAdapter markerInfoWindowAdapter = new MarkerInfoWindowAdapter(getApplicationContext());
+            mMap.setInfoWindowAdapter(markerInfoWindowAdapter);
+
+            //Handle recive noti
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(21.016764, 105.782865), 16), 1500, null);
+            Glide.with(MapsActivity.this)
+                    .asBitmap()
+                    .load("https://scontent.fhan2-3.fna.fbcdn.net/v/t1.0-9/67818412_2217317141713228_6799879711511019520_n.jpg?_nc_cat=108&_nc_oc=AQnVX7HZ8wUh-2KKbDkL8Ea7RWkrelVBo89CQ1OkF0oXip06hkSr7uNskNgkVQuJ8I0&_nc_ht=scontent.fhan2-3.fna&oh=d161acc4a884f233272a6ab29d3b2b7b&oe=5E5FAF8D")
+                    .fitCenter()
+                    .circleCrop()
+                    .into(new SimpleTarget<Bitmap>(80, 80) {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            mMap.addMarker(new MarkerOptions()
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resource))
+                                    .title("Thanh")
+                                    .position(new LatLng(21.016764, 105.782865)))
+                            ;
+                        }
+                    });
+
+//            apiInterface.requestSOS().enqueue(new Callback<LoginResponse>() {
+//                @Override
+//                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+//                    Log.d("MapsACtivityyy", "onResponse: ");
+//
+//                }
+//
+//                @Override
+//                public void onFailure(Call<LoginResponse> call, Throwable t) {
+//                    Log.d("MapsACtivityyy", "onFailure: ");
+//                }
+//            });
+        } else {
+            sendSosCancel();
+            mMap.clear();
+            txt_sos.setText("SOS");
+            getDeviceLocation();
+        }
+
+    }
+
     private void sendSosCancel() {
         String entityId = prefHelper.getString("AUTHORIZATION_KEY");
         HashMap<String, String> option = new HashMap<>();
@@ -259,17 +308,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             @Override
+
             public void onFailure(Call<DataSos> call, Throwable t) {
                 Log.d("MapsACtivityyy", "onFailure: ");
             }
         });
     }
 
-    private void Controls() {
-        edt_findAway = findViewById(R.id.edt_search);
-        img_gps = findViewById(R.id.img_gps);
-    }
+    //Handle show popup on click
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
 
+        String name = marker.getTitle();
+
+        if (name.equalsIgnoreCase("Thanh")) {
+            marker.showInfoWindow();
+            //write your code here
+        }
+        return true;
+    }
 
     @SuppressLint("MissingPermission")
     @Override
@@ -403,6 +460,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 myProgressDialog.dismiss();
             }
         });
+
+//        testMarkerClick();
+    }
+
+    private void testMarkerClick() {
+
+
+//        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+//            @Override
+//            public void onMapClick(LatLng arg0) {
+//                MarkerOptions markerOptions = new MarkerOptions();
+//                markerOptions.position(arg0);
+//                mMap.animateCamera(CameraUpdateFactory.newLatLng(arg0));
+//                Marker marker = mMap.addMarker(markerOptions);
+//                marker.showInfoWindow();
+//            }
+//        });
+
     }
 
     //Lấy vị trí hiện tại
@@ -432,7 +507,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15), 1500, null);
             circle = mMap.addCircle(new CircleOptions()
                     .center(userLocation)
-                    .radius(400)
+                    .radius(500)
                     .strokeWidth(0f)
                     .fillColor(Color.argb(100, 135, 206, 235)));
 //            mMap.addMarker(new MarkerOptions().position(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()))
@@ -590,7 +665,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //thiết lập sự kiện đã tải Map thành công
             mapFragment.getMapAsync(this);
 
-            Controls();
             Events();
             arrayMarker = addAddMarker.getArrayMarker();
             RightLocation();

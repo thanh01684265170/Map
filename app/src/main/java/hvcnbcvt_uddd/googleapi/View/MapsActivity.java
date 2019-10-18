@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -29,6 +28,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import com.appolica.interactiveinfowindow.InfoWindow;
+import com.appolica.interactiveinfowindow.InfoWindowManager;
+import com.appolica.interactiveinfowindow.customview.TouchInterceptFrameLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -38,7 +40,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -73,9 +74,9 @@ import java.util.Locale;
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.MarkerManage;
-import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
 import hvcnbcvt_uddd.googleapi.R;
 import hvcnbcvt_uddd.googleapi.View.adapter.MarkerInfoWindowAdapter;
+import hvcnbcvt_uddd.googleapi.View.fragment.PopupFragment;
 import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
 import hvcnbcvt_uddd.googleapi.data.api.ApiInterface;
 import hvcnbcvt_uddd.googleapi.data.database.PrefHelper;
@@ -120,18 +121,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ApiInterface apiInterface;
     PrefHelper prefHelper;
     ImageView buttonSendHelp;
-    String lat = "";
-    String lon = "";
+
+    private InfoWindowManager infoWindowManager;
+    private InfoWindow formWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         initView();
 
-        lat = getIntent().getStringExtra("LAT");
-        lon = getIntent().getStringExtra("LON");
-        System.out.println("" + lat + lon);
+        final TouchInterceptFrameLayout mapViewContainer =
+                findViewById(R.id.mapViewContainer);
+
+        infoWindowManager = new InfoWindowManager(getSupportFragmentManager());
+        infoWindowManager.onParentViewCreated(mapViewContainer, savedInstanceState);
 
 
 //        Cấp quyền truy cập với api 23 trở lên
@@ -165,6 +170,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             arrayMarker = addAddMarker.getArrayMarker();
             RightLocation();
         }
+    }
+
+    private void getSOS() {
+        final String lat = getIntent().getStringExtra("LAT");
+        final String lon = getIntent().getStringExtra("LON");
+        Log.i("thanh", lat + "," + lon);
+        if (lat != null & lon != null) {
+
+            //Custom Popup marker
+//            Glide.with(MapsActivity.this)
+//                    .asBitmap()
+//                    .load("https://scontent.fhan2-3.fna.fbcdn.net/v/t1.0-9/67818412_2217317141713228_6799879711511019520_n.jpg?_nc_cat=108&_nc_oc=AQnVX7HZ8wUh-2KKbDkL8Ea7RWkrelVBo89CQ1OkF0oXip06hkSr7uNskNgkVQuJ8I0&_nc_ht=scontent.fhan2-3.fna&oh=d161acc4a884f233272a6ab29d3b2b7b&oe=5E5FAF8D")
+//                    .fitCenter()
+//                    .circleCrop()
+//                    .into(new SimpleTarget<Bitmap>(80, 80) {
+//                        @Override
+//                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+//                            mMap.addMarker(new MarkerOptions()
+//                                    .icon(BitmapDescriptorFactory.fromBitmap(resource))
+//                                    .title("Thanh")
+//                                    .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))))
+//                            ;
+//                        }
+//                    });
+
+            marker = mMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32))
+                    .title("thanh")
+                    .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))));
+
+            //set possition pop up
+            final int offsetX = (int) getResources().getDimension(R.dimen.marker_offset_x);
+            final int offsetY = (int) getResources().getDimension(R.dimen.marker_offset_y);
+
+            final InfoWindow.MarkerSpecification markerSpec =
+                    new InfoWindow.MarkerSpecification(offsetX, offsetY);
+            formWindow = new InfoWindow(marker, markerSpec, new PopupFragment());
+        }
+    }
+
+    //Handle show popup on click
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+//        if (marker.getTitle().equalsIgnoreCase("Thanh")) {
+//            MarkerInfoWindowAdapter markerInfoWindowAdapter = new MarkerInfoWindowAdapter(getApplicationContext());
+//            mMap.setInfoWindowAdapter(markerInfoWindowAdapter);
+//            marker.showInfoWindow();
+//            //write your code here
+//        }
+
+        if (marker.getTitle().equalsIgnoreCase("thanh")) {
+            infoWindowManager.toggle(formWindow, true);
+        }
+
+        return true;
     }
 
     private void initView() {
@@ -253,40 +314,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .strokeWidth(0f)
                     .fillColor(Color.argb(100, 250, 128, 114)));
 
-            //Custom Popup marker
-            MarkerInfoWindowAdapter markerInfoWindowAdapter = new MarkerInfoWindowAdapter(getApplicationContext());
-            mMap.setInfoWindowAdapter(markerInfoWindowAdapter);
-
-            //Handle recive noti
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(21.016764, 105.782865), 16), 1500, null);
-            Glide.with(MapsActivity.this)
-                    .asBitmap()
-                    .load("https://scontent.fhan2-3.fna.fbcdn.net/v/t1.0-9/67818412_2217317141713228_6799879711511019520_n.jpg?_nc_cat=108&_nc_oc=AQnVX7HZ8wUh-2KKbDkL8Ea7RWkrelVBo89CQ1OkF0oXip06hkSr7uNskNgkVQuJ8I0&_nc_ht=scontent.fhan2-3.fna&oh=d161acc4a884f233272a6ab29d3b2b7b&oe=5E5FAF8D")
-                    .fitCenter()
-                    .circleCrop()
-                    .into(new SimpleTarget<Bitmap>(80, 80) {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            mMap.addMarker(new MarkerOptions()
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resource))
-                                    .title("Thanh")
-                                    .position(new LatLng(21.016764, 105.782865)))
-                            ;
-                        }
-                    });
-
-//            apiInterface.requestSOS().enqueue(new Callback<LoginResponse>() {
-//                @Override
-//                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-//                    Log.d("MapsACtivityyy", "onResponse: ");
-//
-//                }
-//
-//                @Override
-//                public void onFailure(Call<LoginResponse> call, Throwable t) {
-//                    Log.d("MapsACtivityyy", "onFailure: ");
-//                }
-//            });
         } else {
             sendSosCancel();
             mMap.clear();
@@ -315,18 +342,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    //Handle show popup on click
-    @Override
-    public boolean onMarkerClick(final Marker marker) {
-
-        String name = marker.getTitle();
-
-        if (name.equalsIgnoreCase("Thanh")) {
-            marker.showInfoWindow();
-            //write your code here
-        }
-        return true;
-    }
 
     @SuppressLint("MissingPermission")
     @Override
@@ -437,8 +452,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         Circle circle;
         mMap = googleMap;
+        infoWindowManager.onMapReady(googleMap);
         //Lấy và hiển thị vị trí hiện tại
         getDeviceLocation();
+        getSOS();
+
 
         // Hiển thị marker
         for (int i = 0; i < arrayMarker.size(); i++) {
@@ -460,24 +478,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 myProgressDialog.dismiss();
             }
         });
-
-//        testMarkerClick();
-    }
-
-    private void testMarkerClick() {
-
-
-//        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-//            @Override
-//            public void onMapClick(LatLng arg0) {
-//                MarkerOptions markerOptions = new MarkerOptions();
-//                markerOptions.position(arg0);
-//                mMap.animateCamera(CameraUpdateFactory.newLatLng(arg0));
-//                Marker marker = mMap.addMarker(markerOptions);
-//                marker.showInfoWindow();
-//            }
-//        });
-
+        googleMap.setOnMarkerClickListener(this);
     }
 
     //Lấy vị trí hiện tại

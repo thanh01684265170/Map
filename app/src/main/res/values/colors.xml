@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#29B6F6</color>
-    <color name="colorPrimaryDark">#039BE5</color>
+    <color name="colorPrimary">#02CEE9</color>
+    <color name="colorPrimaryDark">#00BCD4</color>
     <color name="colorAccent">#FF4081</color>
 
     <color name="icon">#CCCCCC</color>
@@ -10,6 +10,7 @@
     <color name="green">#64DD17</color>
     <color name="black">#000000</color>
     <color name="transperent">#00FFFEFE</color>
+    <color name="grey">#ACACAC</color>
 
     <!--Profile-->
     <color name="graylight">#fafafa</color>

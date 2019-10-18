@@ -17,7 +17,7 @@
     <string name="radio_very_dangerous">Very dangerous</string>
     <string name="item_status_name">Nguyễn Văn A</string>
     <string name="item_user_phone">0965955592</string>
-    <string name="btn_send">Send</string>
+    <string name="btn_send">Gửi</string>
     <string-array name="gender_arrays">
         <item>Male</item>
         <item>Female</item>

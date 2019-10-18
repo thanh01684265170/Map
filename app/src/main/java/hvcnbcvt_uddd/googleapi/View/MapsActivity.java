@@ -244,8 +244,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void initDataInfoWindow() {
         Log.d("Chinh1", "initDataInfoWindow");
         popupFragment.setTextViewContent(phone, content);
-        //TODO: entity id
-        apiInterface.getUsersSos("4P6hPhheUMLamj4iYV6l").enqueue(new Callback<DataUsersSosResponse>() {
+        apiInterface.getUsersSos(entityId).enqueue(new Callback<DataUsersSosResponse>() {
             @Override
             public void onResponse(Call<DataUsersSosResponse> call, Response<DataUsersSosResponse> response) {
                 if (response.isSuccessful()) {
@@ -347,7 +346,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void sendSos() {
         if (txt_sos.getText().equals("SOS")) {
             sendRequestSos();
-            txt_sos.setText("Cancel");
+            txt_sos.setText("Hủy");
             //change color cricle
             if (circle != null) {
                 circle.remove();

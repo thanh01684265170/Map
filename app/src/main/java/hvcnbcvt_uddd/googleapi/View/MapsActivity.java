@@ -22,6 +22,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+
 import com.appolica.interactiveinfowindow.InfoWindow;
 import com.appolica.interactiveinfowindow.InfoWindowManager;
 import com.appolica.interactiveinfowindow.customview.TouchInterceptFrameLayout;
@@ -73,6 +79,8 @@ import androidx.fragment.app.FragmentActivity;
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.MarkerManage;
+import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.User;
+import hvcnbcvt_uddd.googleapi.Model.datauserlistresponse.DataUsersSosResponse;
 import hvcnbcvt_uddd.googleapi.R;
 import hvcnbcvt_uddd.googleapi.View.fragment.PopupFragment;
 import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
@@ -104,10 +112,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private EditText edt_findAway;
     private ImageView img_gps;
+    private ImageView imgProfile;
     private TextView txt_sos;
     private View btnSos;
     private float distance;
 
+    private String phone;
+    private String entityId;
+    private String content;
 
     //Xử lý playmedia
     int check = 0;
@@ -121,6 +133,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ImageView buttonSendHelp;
 
     private InfoWindowManager infoWindowManager;
+    private PopupFragment popupFragment;
     private InfoWindow formWindow;
 
     @Override
@@ -173,12 +186,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void getSOS() {
         final String lat = getIntent().getStringExtra("LAT");
         final String lon = getIntent().getStringExtra("LON");
+        phone = getIntent().getStringExtra("PHONE");
+        entityId = getIntent().getStringExtra("ENTITY_ID");
+        content = getIntent().getStringExtra("CONTENT");
+
         Log.i("thanh", lat + "," + lon);
+
         if (lat != null & lon != null) {
 
             marker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32))
-                    .title("thanh")
+                    .title(entityId)
                     .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))));
 
             marker.setVisible(false);
@@ -189,7 +207,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             final InfoWindow.MarkerSpecification markerSpec =
                     new InfoWindow.MarkerSpecification(offsetX, offsetY);
-            formWindow = new InfoWindow(marker, markerSpec, new PopupFragment());
+            popupFragment = new PopupFragment();
+            initDataInfoWindow();
+
+            formWindow = new InfoWindow(marker, markerSpec, popupFragment);
 
             Glide.with(MapsActivity.this)
                     .asBitmap()
@@ -201,7 +222,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             mMap.addMarker(new MarkerOptions()
                                     .icon(BitmapDescriptorFactory.fromBitmap(resource))
-                                    .title("Thanh")
+                                    .title(entityId)
                                     .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))))
                             ;
                         }
@@ -213,11 +234,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        if (marker.getTitle().equalsIgnoreCase("thanh")) {
+        if (marker.getTitle().equalsIgnoreCase(entityId)) {
             infoWindowManager.toggle(formWindow, true);
         }
 
         return true;
+    }
+
+    private void initDataInfoWindow() {
+        Log.d("Chinh1", "initDataInfoWindow");
+        popupFragment.setTextViewContent(phone, content);
+        //TODO: entity id
+        apiInterface.getUsersSos("4P6hPhheUMLamj4iYV6l").enqueue(new Callback<DataUsersSosResponse>() {
+            @Override
+            public void onResponse(Call<DataUsersSosResponse> call, Response<DataUsersSosResponse> response) {
+                if (response.isSuccessful()) {
+                    DataUsersSosResponse dataUsersSosResponse = response.body();
+                    List<User> users = dataUsersSosResponse.getData().getUsers();
+                    Log.d("Chinh1", "initDataInfoWindow onResponse: " + users.size());
+                    popupFragment.setUserListData(users);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DataUsersSosResponse> call, Throwable t) {
+                Log.d("Chinh1", "onFailure: " + t.toString());
+            }
+        });
     }
 
     private void initView() {
@@ -225,6 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         prefHelper = new PrefHelper(this);
         edt_findAway = findViewById(R.id.edt_search);
         img_gps = findViewById(R.id.img_gps);
+        imgProfile = findViewById(R.id.img_profile);
         btnSos = findViewById(R.id.button_sos);
         txt_sos = findViewById(R.id.txt_sos);
         apiInterface = ApiBuilder.getServiceApi(this);
@@ -234,6 +278,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         buttonSendHelp.setOnClickListener(this);
         edt_findAway.setOnClickListener(this);
         img_gps.setOnClickListener(this);
+        imgProfile.setOnClickListener(this);
         btnSos.setOnClickListener(this);
     }
 
@@ -252,9 +297,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case R.id.img_send:
                 openSOSRequestActivity();
                 break;
+            case R.id.img_profile:
+                openProfileActivity();
             default:
                 break;
         }
+    }
+
+    private void openProfileActivity() {
+        Intent intent = new Intent(MapsActivity.this, ProfileActivity.class);
+        MapsActivity.this.startActivity(intent);
     }
 
     private void openSOSRequestActivity() {

@@ -5,9 +5,12 @@ import java.util.HashMap;
 import hvcnbcvt_uddd.googleapi.Model.BodySendSOS;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
+import hvcnbcvt_uddd.googleapi.Model.datauserlistresponse.DataUsersSosResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public interface ApiInterface {
 
@@ -28,4 +31,7 @@ public interface ApiInterface {
 
     @POST("cancel")
     Call<DataSos> cancelSOS(@Body HashMap<String, String> entityId);
+
+    @GET("entity/{entityId}")
+    Call<DataUsersSosResponse> getUsersSos(@Path("entityId") String entityId);
 }

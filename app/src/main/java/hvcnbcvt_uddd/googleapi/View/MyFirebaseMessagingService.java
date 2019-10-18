@@ -26,14 +26,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
 
+    String lat = "";
+    String lon = "";
+    String phone = "";
+    String entityId = "";
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
-        String lat = "";
-        String lon = "";
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
@@ -50,6 +52,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
              lat = data.get("latitude").toString();
              lon = data.get("longitude").toString();
+             phone = data.get("phone").toString();
+             entityId = data.get("entityId").toString();
         }
 
         // Check if message contains a notification payload.
@@ -58,7 +62,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             String title = remoteMessage.getNotification().getTitle();
             String body = remoteMessage.getNotification().getBody();
-            sendNotification(title, body, lat, lon);
+            sendNotification(title, body);
         }
     }
 
@@ -104,11 +108,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      *
      * @param messageBody FCM message body received.
      */
-    private void sendNotification(String title, String messageBody, String lat, String lon) {
+    private void sendNotification(String title, String messageBody) {
         Intent intent = new Intent(this, MapsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("LAT", lat);
         intent.putExtra("LON", lon);
+        intent.putExtra("PHONE", phone);
+        intent.putExtra("ENTITY_ID", entityId);
+        intent.putExtra("CONTENT", messageBody);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
         String channelId = getString(R.string.default_notification_channel_id);

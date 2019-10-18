@@ -2,6 +2,7 @@ package hvcnbcvt_uddd.googleapi.data.api;
 
 import java.util.HashMap;
 
+import hvcnbcvt_uddd.googleapi.Model.BodySendSOS;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
 import retrofit2.Call;
@@ -18,6 +19,9 @@ public interface ApiInterface {
 
     @POST("request")
     Call<DataSos> requestSOS(@Body HashMap<String, Double> parameters);
+
+    @POST("request")
+    Call<DataSos> sendSOS(@Body BodySendSOS bodySendSOS);
 
     @POST("response")
     Call<LoginResponse> responseSOS(@Body HashMap<String, String> entityId, @Body HashMap<String, Boolean> accept);

@@ -22,12 +22,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import com.appolica.interactiveinfowindow.InfoWindow;
 import com.appolica.interactiveinfowindow.InfoWindowManager;
 import com.appolica.interactiveinfowindow.customview.TouchInterceptFrameLayout;
@@ -71,11 +65,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.MarkerManage;
 import hvcnbcvt_uddd.googleapi.R;
-import hvcnbcvt_uddd.googleapi.View.adapter.MarkerInfoWindowAdapter;
 import hvcnbcvt_uddd.googleapi.View.fragment.PopupFragment;
 import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
 import hvcnbcvt_uddd.googleapi.data.api.ApiInterface;
@@ -178,27 +176,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i("thanh", lat + "," + lon);
         if (lat != null & lon != null) {
 
-            //Custom Popup marker
-//            Glide.with(MapsActivity.this)
-//                    .asBitmap()
-//                    .load("https://scontent.fhan2-3.fna.fbcdn.net/v/t1.0-9/67818412_2217317141713228_6799879711511019520_n.jpg?_nc_cat=108&_nc_oc=AQnVX7HZ8wUh-2KKbDkL8Ea7RWkrelVBo89CQ1OkF0oXip06hkSr7uNskNgkVQuJ8I0&_nc_ht=scontent.fhan2-3.fna&oh=d161acc4a884f233272a6ab29d3b2b7b&oe=5E5FAF8D")
-//                    .fitCenter()
-//                    .circleCrop()
-//                    .into(new SimpleTarget<Bitmap>(80, 80) {
-//                        @Override
-//                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-//                            mMap.addMarker(new MarkerOptions()
-//                                    .icon(BitmapDescriptorFactory.fromBitmap(resource))
-//                                    .title("Thanh")
-//                                    .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))))
-//                            ;
-//                        }
-//                    });
-
             marker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32))
                     .title("thanh")
                     .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))));
+
+            marker.setVisible(false);
 
             //set possition pop up
             final int offsetX = (int) getResources().getDimension(R.dimen.marker_offset_x);
@@ -207,19 +190,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             final InfoWindow.MarkerSpecification markerSpec =
                     new InfoWindow.MarkerSpecification(offsetX, offsetY);
             formWindow = new InfoWindow(marker, markerSpec, new PopupFragment());
+
+            Glide.with(MapsActivity.this)
+                    .asBitmap()
+                    .load("https://scontent.fhan2-3.fna.fbcdn.net/v/t1.0-9/67818412_2217317141713228_6799879711511019520_n.jpg?_nc_cat=108&_nc_oc=AQnVX7HZ8wUh-2KKbDkL8Ea7RWkrelVBo89CQ1OkF0oXip06hkSr7uNskNgkVQuJ8I0&_nc_ht=scontent.fhan2-3.fna&oh=d161acc4a884f233272a6ab29d3b2b7b&oe=5E5FAF8D")
+                    .fitCenter()
+                    .circleCrop()
+                    .into(new SimpleTarget<Bitmap>(80, 80) {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            mMap.addMarker(new MarkerOptions()
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resource))
+                                    .title("Thanh")
+                                    .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))))
+                            ;
+                        }
+                    });
         }
     }
 
     //Handle show popup on click
     @Override
     public boolean onMarkerClick(Marker marker) {
-
-//        if (marker.getTitle().equalsIgnoreCase("Thanh")) {
-//            MarkerInfoWindowAdapter markerInfoWindowAdapter = new MarkerInfoWindowAdapter(getApplicationContext());
-//            mMap.setInfoWindowAdapter(markerInfoWindowAdapter);
-//            marker.showInfoWindow();
-//            //write your code here
-//        }
 
         if (marker.getTitle().equalsIgnoreCase("thanh")) {
             infoWindowManager.toggle(formWindow, true);
@@ -267,6 +259,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void openSOSRequestActivity() {
         Intent sosHelpActivityIntent = new Intent(this, SOSRequestActivity.class);
+        sosHelpActivityIntent.putExtra("lat", myLocation.getLatitude());
+        sosHelpActivityIntent.putExtra("lon", myLocation.getLongitude());
         startActivity(sosHelpActivityIntent);
     }
 
@@ -320,7 +314,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             txt_sos.setText("SOS");
             getDeviceLocation();
         }
-
     }
 
     private void sendSosCancel() {
@@ -331,7 +324,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onResponse(Call<DataSos> call, Response<DataSos> response) {
                 Log.d("MapsACtivityyy", "onResponse: ");
-                Toast.makeText(getApplicationContext(), response.body().getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Canceled request!", Toast.LENGTH_LONG).show();
             }
 
             @Override

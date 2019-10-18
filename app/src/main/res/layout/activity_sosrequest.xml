@@ -10,30 +10,30 @@
         android:id="@+id/toolbar"
         android:layout_width="@dimen/dp_0"
         android:layout_height="@dimen/dp_56"
+        android:background="#00C3E4"
+        android:padding="@dimen/dp_16"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:padding="@dimen/dp_16"
-        android:background="#00C3E4">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/btn_back"
             android:layout_width="@dimen/dp_24"
             android:layout_height="@dimen/dp_24"
+            android:src="@drawable/ic_arrow_back"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/ic_arrow_back"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Send Request SOS"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/dp_20"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:textSize="@dimen/dp_20"
-            android:textColor="#FFFFFF"
-            android:text="Send Request SOS" />
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ScrollView
@@ -55,11 +55,11 @@
                 android:id="@+id/txt_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:textStyle="bold"
+                android:text="Content"
                 android:textSize="@dimen/dp_20"
-                android:text="Content"/>
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/edit_content"
@@ -68,69 +68,28 @@
                 android:layout_marginLeft="@dimen/dp_10"
                 android:layout_marginTop="@dimen/dp_10"
                 android:background="@drawable/border_edit_text_15dp"
+                android:gravity="start"
                 android:inputType="textMultiLine"
                 android:lines="8"
-                android:scrollbars="vertical"
                 android:overScrollMode="always"
-                android:scrollbarStyle="insideInset"
-                android:gravity="start"
                 android:padding="@dimen/dp_10"
+                android:scrollbarStyle="insideInset"
+                android:scrollbars="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/txt_content" />
 
-            <TextView
-                android:id="@+id/txt_sos_level"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/edit_content"
-                android:layout_marginTop="@dimen/dp_25"
-                android:textStyle="bold"
-                android:textSize="@dimen/dp_20"
-                android:text="SOS Level"/>
-
-            <RadioGroup
-                android:id="@+id/radio_sos_level"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/txt_sos_level"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="@dimen/dp_30"
-                android:paddingLeft="@dimen/dp_30">
-
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/radio_normal"
-                    android:textColor="@color/green_dark"
-                    android:textSize="@dimen/dp_16"/>
-
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/radio_danger"
-                    android:textColor="@color/yellow_dark"
-                    android:textSize="@dimen/dp_16"/>
-
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/radio_very_dangerous"
-                    android:textColor="@color/red_dark"
-                    android:textSize="@dimen/dp_16"/>
-            </RadioGroup>
-
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_send"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/radio_sos_level"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="@dimen/dp_40"
                 android:background="@drawable/bg_button"
                 android:text="@string/btn_send"
-                android:textColor="#FFFFFF"/>
+                android:textColor="#FFFFFF"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/edit_content" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

@@ -268,19 +268,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
-        android:text="Bật chế độ cửa hàng"
+        android:text="Nhận thông báo SOS"
         app:layout_constraintBottom_toBottomOf="@+id/imageView13"
         app:layout_constraintStart_toEndOf="@+id/imageView13" />
 
-    <Switch
-        android:id="@+id/switch1"
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_free"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView9"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.8"
         app:layout_constraintStart_toEndOf="@+id/textView9"
-        app:layout_constraintTop_toTopOf="@+id/textView9" />
+        app:layout_constraintTop_toTopOf="@+id/textView9"
+        app:layout_constraintVertical_bias="0.375" />
 
     <ImageView
         android:id="@+id/imageView14"

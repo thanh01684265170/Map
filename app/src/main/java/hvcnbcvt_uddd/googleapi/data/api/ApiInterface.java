@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import hvcnbcvt_uddd.googleapi.Model.BodySendSOS;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
+import hvcnbcvt_uddd.googleapi.Model.datafreeresponse.DataFreeResponse;
 import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
 import hvcnbcvt_uddd.googleapi.Model.datasosresponse.SosResponse;
 import hvcnbcvt_uddd.googleapi.Model.datauserlistresponse.DataUsersSosResponse;
@@ -35,4 +36,7 @@ public interface ApiInterface {
 
     @GET("entity/{entityId}")
     Call<DataUsersSosResponse> getUsersSos(@Path("entityId") String entityId);
+
+    @POST("free")
+    Call<DataFreeResponse> sendDataFreeRequest(@Body HashMap<String, String> option);
 }

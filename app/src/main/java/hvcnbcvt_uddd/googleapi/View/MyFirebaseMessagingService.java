@@ -41,7 +41,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        apiInterface = ApiBuilder.getServiceApi(getApplicationContext());
+        if (getApplicationContext() != null) {
+            apiInterface = ApiBuilder.getServiceApi(getApplicationContext());
+        }
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
         // Check if message contains a data payload.
@@ -82,7 +84,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         Log.d(TAG, "Refreshed token: " + token);
-        sendRegistrationToServer(token);
+        if (token != null && apiInterface != null) {
+            sendRegistrationToServer(token);
+        }
     }
 
     /**

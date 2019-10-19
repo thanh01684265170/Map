@@ -71,18 +71,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.MarkerManage;
 import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.User;
+import hvcnbcvt_uddd.googleapi.Model.datasosresponse.SosResponse;
 import hvcnbcvt_uddd.googleapi.Model.datauserlistresponse.DataUsersSosResponse;
 import hvcnbcvt_uddd.googleapi.R;
 import hvcnbcvt_uddd.googleapi.View.fragment.PopupFragment;
+import hvcnbcvt_uddd.googleapi.View.fragment.PopupListener;
 import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
 import hvcnbcvt_uddd.googleapi.data.api.ApiInterface;
 import hvcnbcvt_uddd.googleapi.data.database.PrefHelper;
@@ -91,47 +88,42 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener, GoogleMap.OnMarkerClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+        LocationListener, View.OnClickListener, GoogleMap.OnMarkerClickListener, PopupListener {
 
-    private GoogleMap mMap;
-    private ProgressDialog myProgressDialog;
-    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 23487;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     public static final int PATTERN_DASH_LENGTH_PX = 20;
     public static final int PATTERN_GAP_LENGTH_PX = 20;
     public static final PatternItem DASH = new Dash(PATTERN_DASH_LENGTH_PX);
     public static final PatternItem GAP = new Gap(PATTERN_GAP_LENGTH_PX);
     public static final List<PatternItem> PATTERN_POLYGON_ALPHA = Arrays.asList(GAP, DASH);
-
     private static LatLng PLACE_YOU_GO;
-    private Polyline newPolyline;
-    private LatLngBounds latlngBounds;
-    private Marker marker = null;
-    private Circle circle = null;
-    private Location myLocation;
-
-    private EditText edt_findAway;
-    private ImageView img_gps;
-    private ImageView imgProfile;
-    private TextView txt_sos;
-    private View btnSos;
-    private float distance;
-
-    private String phone;
-    private String entityId;
-    private String content;
-
     //Xử lý playmedia
     int check = 0;
     int nameCircle = 0;
-
     ArrayList<MarkerManage> arrayMarker;
     AddMarker addAddMarker = new AddMarker();
     MediaPlayer mediaPlayer;
     ApiInterface apiInterface;
     PrefHelper prefHelper;
     ImageView buttonSendHelp;
-
+    private GoogleMap mMap;
+    private ProgressDialog myProgressDialog;
+    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 23487;
+    private Polyline newPolyline;
+    private LatLngBounds latlngBounds;
+    private Marker marker = null;
+    private Circle circle = null;
+    private Location myLocation;
+    private EditText edt_findAway;
+    private ImageView img_gps;
+    private ImageView imgProfile;
+    private TextView txt_sos;
+    private View btnSos;
+    private float distance;
+    private String phone;
+    private String entityId;
+    private String content;
     private InfoWindowManager infoWindowManager;
     private PopupFragment popupFragment;
     private InfoWindow formWindow;
@@ -207,7 +199,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             final InfoWindow.MarkerSpecification markerSpec =
                     new InfoWindow.MarkerSpecification(offsetX, offsetY);
-            popupFragment = new PopupFragment();
+            popupFragment = new PopupFragment(this);
             initDataInfoWindow();
 
             formWindow = new InfoWindow(marker, markerSpec, popupFragment);
@@ -398,7 +390,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 edt_findAway.setText(place.getName());
-                marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName().toString()).snippet("Nơi bạn đến."));
+                marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName()).snippet("Nơi bạn đến."));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 17));
 
                 //Set vị trí vừa tìm được
@@ -606,11 +598,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         newLocation.setLatitude(lat);
         newLocation.setLongitude(log);
         distance = myLocation.distanceTo(newLocation);
-        if (r >= distance) {
-            return true;
-        } else {
-            return false;
-        }
+        return r >= distance;
     }
 
     //Hàm tìm điểm gần nhất
@@ -748,5 +736,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             return true;
         }
+    }
+
+    @Override
+    public void confirmCallBack() {
+        //Dialog
+        final ProgressDialog progressDialog = new ProgressDialog(MapsActivity.this,
+                R.style.AppTheme_Dark_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Đang gửi yêu cầu...");
+        progressDialog.show();
+
+        HashMap<String, String> option = new HashMap<>();
+        option.put("entityId", entityId);
+        option.put("accept", "true");
+        apiInterface.responseSOS(option).enqueue(new Callback<SosResponse>() {
+            @Override
+            public void onResponse(Call<SosResponse> call, Response<SosResponse> response) {
+                if (response.isSuccessful()) {
+                    String responseMess = response.body().getMessage();
+                    Toast.makeText(getApplicationContext(), responseMess, Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SosResponse> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "request fail", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+            }
+        });
+    }
+
+    @Override
+    public void cancelCallBack() {
+        marker.hideInfoWindow();
     }
 }

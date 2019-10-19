@@ -39,6 +39,8 @@ public class User {
     private String mUpdatedAt;
     @SerializedName("userId")
     private String mUserId = "";
+    @SerializedName("free")
+    private Integer free;
 
     public String getCreatedAt() {
         return mCreatedAt;
@@ -128,4 +130,11 @@ public class User {
         mUserId = userId;
     }
 
+    public Integer getFree() {
+        return free;
+    }
+
+    public void setFree(Integer free) {
+        this.free = free;
+    }
 }

@@ -22,12 +22,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import com.appolica.interactiveinfowindow.InfoWindow;
 import com.appolica.interactiveinfowindow.InfoWindowManager;
 import com.appolica.interactiveinfowindow.customview.TouchInterceptFrameLayout;
@@ -75,6 +69,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import hvcnbcvt_uddd.googleapi.Control.AddMarker;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
@@ -132,8 +132,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private InfoWindowManager infoWindowManager;
     private PopupFragment popupFragment;
     private InfoWindow formWindow;
+    private String entityIDSOS = "";
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    private List<User> listUserHelp = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,7 +186,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             arrayMarker = addAddMarker.getArrayMarker();
             RightLocation();
         }
-        listenListUsers();
     }
 
     private void getSOS() {
@@ -193,11 +195,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i("thanh", lat + "," + lon);
 
         if (lat != null & lon != null) {
-
+            PLACE_YOU_GO = new LatLng(Double.parseDouble(lat), Double.parseDouble(lon));
             marker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32))
                     .title(entityId)
-                    .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))));
+                    .position(PLACE_YOU_GO));
 
             marker.setVisible(false);
 
@@ -223,10 +225,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             mMap.addMarker(new MarkerOptions()
                                     .icon(BitmapDescriptorFactory.fromBitmap(resource))
                                     .title(entityId)
-                                    .position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))))
+                                    .position(PLACE_YOU_GO))
                             ;
                         }
                     });
+
+            LatLng userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+            latlngBounds = createLatLngBoundsObject(userLocation, PLACE_YOU_GO);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
+                    latlngBounds, 800, 500, 50));
         }
     }
 
@@ -236,6 +243,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (marker.getTitle().equalsIgnoreCase(entityId)) {
             infoWindowManager.toggle(formWindow, true);
+            initDataInfoWindow();
         }
 
         return true;
@@ -303,35 +311,69 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void listenListUsers() {
-       if (entityId != null) {
-           db.collection("entities").document(entityId).collection("users")
-                   .addSnapshotListener(MapsActivity.this, new EventListener<QuerySnapshot>() {
-                       @Override
-                       public void onEvent(@Nullable QuerySnapshot snapshots,
-                                           @Nullable FirebaseFirestoreException e) {
-                           if (e != null) {
-                               Log.w("Mapsll", "listen:error", e);
-                               return;
-                           }
+    private void listenListUsers(String entityIdSos) {
+        Log.d("Mapsll", "listen");
+        if (entityIdSos != null) {
+            db.collection("entities").document(entityIdSos).collection("users")
+                    .addSnapshotListener(MapsActivity.this, new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot snapshots,
+                                            @Nullable FirebaseFirestoreException e) {
+                            if (e != null) {
+                                Log.w("Mapsll", "listen:error", e);
+                                return;
+                            }
 
-                           for (DocumentChange dc : snapshots.getDocumentChanges()) {
-                               switch (dc.getType()) {
-                                   case ADDED:
-                                       Log.d("Mapsll", "New: " + dc.getDocument().getData());
-                                       break;
-                                   case MODIFIED:
-                                       Log.d("Mapsll", "Modified: " + dc.getDocument().getData());
-                                       break;
-                                   case REMOVED:
-                                       Log.d("Mapsll", "Removed: " + dc.getDocument().getData());
-                                       break;
-                               }
-                           }
+                            for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                                switch (dc.getType()) {
+                                    case ADDED:
+                                        User user = dc.getDocument().toObject(User.class);
+                                        Log.d("Mapsll", "New: " + user.toString());
+                                        listUserHelp.add(user);
+                                        Log.d("Mapsll", "Size list: " + listUserHelp.size());
+                                        reDrawMap(listUserHelp);
+                                        break;
+                                    case MODIFIED:
+                                        Log.d("Mapsll", "Modified: " + dc.getDocument().getData());
+                                        break;
+                                    case REMOVED:
+                                        Log.d("Mapsll", "Removed: " + dc.getDocument().getData());
+                                        break;
+                                }
+                            }
+                        }
+                    });
+        }
+    }
 
-                       }
-                   });
-       }
+    private void reDrawMap(List<User> users) {
+        Log.d("Mapsll", "Size reDrawMap: " + listUserHelp.size());
+        // Hiển thị marker
+        for (int i = 0; i < listUserHelp.size(); i++) {
+//            mMap.addMarker(new MarkerOptions().position(new LatLng(listUserHelp.get(i).getLocation().getLatitude(), listUserHelp.get(i).getLocation().getLongitude()))
+//                    .title(arrayMarker.get(i).getTitle()).snippet(arrayMarker.get(i).getSnippet())
+//                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32)));
+
+            final LatLng address = new LatLng(listUserHelp.get(i).getLocation().getLatitude(), listUserHelp.get(i).getLocation().getLongitude());
+            Glide.with(MapsActivity.this)
+                    .asBitmap()
+                    .load("https://scontent.fhan2-4.fna.fbcdn.net/v/t1.0-9/68242494_2365249090357913_2795695690158702592_n.j" +
+                            "pg?_nc_cat=105&_nc_oc=AQmqtmxHB_OimjxtSvt5hhpDxfRuDj_6cqCjUeAC9uGWnhyEtodREuHW5g4dj7nYyAk&_nc_ht=scont" +
+                            "ent.fhan2-4.fna&oh=13fab8a3b68e2fc78bb5dfa3b4b1ee21&oe=5E27F384")
+                    .fitCenter()
+                    .circleCrop()
+                    .into(new SimpleTarget<Bitmap>(80, 80) {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            mMap.addMarker(new MarkerOptions()
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resource))
+                                    .title(entityId)
+                                    .position(address));
+                        }
+                    });
+        }
+
+
     }
 
     private void openProfileActivity() {
@@ -356,6 +398,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onResponse(Call<DataSos> call, Response<DataSos> response) {
                 Log.d("MapsACtivityyy", "onResponse: ");
                 Toast.makeText(getApplicationContext(), response.body().getMessage(), Toast.LENGTH_LONG).show();
+                entityIDSOS = response.body().getData().getEntity().getId();
+                listenListUsers(entityIDSOS);
+                Log.d("Mapsll", "onResponse: " + entityIDSOS);
             }
 
             @Override
@@ -802,6 +847,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onFailure(Call<SosResponse> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "request fail", Toast.LENGTH_SHORT).show();
+                Log.d("chinh", "onFailure: " + t.toString());
                 progressDialog.dismiss();
             }
         });

@@ -56,6 +56,11 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
@@ -122,16 +127,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private View btnSos;
     private float distance;
     private String phone;
-    private String entityId;
+    private String entityId = "5SRYWeGFNrFE8aUNcYnM";
     private String content;
     private InfoWindowManager infoWindowManager;
     private PopupFragment popupFragment;
     private InfoWindow formWindow;
 
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        phone = getIntent().getStringExtra("PHONE");
+        entityId = getIntent().getStringExtra("ENTITY_ID");
+        content = getIntent().getStringExtra("CONTENT");
 
         initView();
 
@@ -140,7 +151,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         infoWindowManager = new InfoWindowManager(getSupportFragmentManager());
         infoWindowManager.onParentViewCreated(mapViewContainer, savedInstanceState);
-
 
 //        Cấp quyền truy cập với api 23 trở lên
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -173,14 +183,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             arrayMarker = addAddMarker.getArrayMarker();
             RightLocation();
         }
+        listenListUsers();
     }
 
     private void getSOS() {
         final String lat = getIntent().getStringExtra("LAT");
         final String lon = getIntent().getStringExtra("LON");
-        phone = getIntent().getStringExtra("PHONE");
-        entityId = getIntent().getStringExtra("ENTITY_ID");
-        content = getIntent().getStringExtra("CONTENT");
 
         Log.i("thanh", lat + "," + lon);
 
@@ -293,6 +301,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             default:
                 break;
         }
+    }
+
+    private void listenListUsers() {
+       if (entityId != null) {
+           db.collection("entities").document(entityId).collection("users")
+                   .addSnapshotListener(MapsActivity.this, new EventListener<QuerySnapshot>() {
+                       @Override
+                       public void onEvent(@Nullable QuerySnapshot snapshots,
+                                           @Nullable FirebaseFirestoreException e) {
+                           if (e != null) {
+                               Log.w("Mapsll", "listen:error", e);
+                               return;
+                           }
+
+                           for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                               switch (dc.getType()) {
+                                   case ADDED:
+                                       Log.d("Mapsll", "New: " + dc.getDocument().getData());
+                                       break;
+                                   case MODIFIED:
+                                       Log.d("Mapsll", "Modified: " + dc.getDocument().getData());
+                                       break;
+                                   case REMOVED:
+                                       Log.d("Mapsll", "Removed: " + dc.getDocument().getData());
+                                       break;
+                               }
+                           }
+
+                       }
+                   });
+       }
     }
 
     private void openProfileActivity() {

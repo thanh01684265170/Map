@@ -11,6 +11,7 @@
     <color name="black">#000000</color>
     <color name="transperent">#00FFFEFE</color>
     <color name="grey">#ACACAC</color>
+    <color name="grey2">#636363</color>
 
     <!--Profile-->
     <color name="graylight">#fafafa</color>

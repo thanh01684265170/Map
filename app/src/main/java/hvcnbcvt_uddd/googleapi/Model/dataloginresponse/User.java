@@ -32,11 +32,13 @@ public class User {
     @SerializedName("name")
     private String mName;
     @SerializedName("password")
-    private Long mPassword;
+    private String mPassword;
     @SerializedName("phone")
     private String mPhone;
     @SerializedName("updatedAt")
     private String mUpdatedAt;
+    @SerializedName("userId")
+    private String mUserId = "";
 
     public String getCreatedAt() {
         return mCreatedAt;
@@ -94,11 +96,11 @@ public class User {
         mName = name;
     }
 
-    public Long getPassword() {
+    public String getPassword() {
         return mPassword;
     }
 
-    public void setPassword(Long password) {
+    public void setPassword(String password) {
         mPassword = password;
     }
 
@@ -116,6 +118,14 @@ public class User {
 
     public void setUpdatedAt(String updatedAt) {
         mUpdatedAt = updatedAt;
+    }
+
+    public String getUserId() {
+        return mUserId;
+    }
+
+    public void setUserId(String userId) {
+        mUserId = userId;
     }
 
 }

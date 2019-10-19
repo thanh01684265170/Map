@@ -51,7 +51,7 @@
         android:layout_marginEnd="16dp"
         android:background="@null"
         android:elevation="10dp"
-        android:hint="Enter address you want go"
+        android:hint="Nhập địa chỉ bạn muốn đến"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="@+id/relLayout1"
         app:layout_constraintEnd_toEndOf="@+id/relLayout1"

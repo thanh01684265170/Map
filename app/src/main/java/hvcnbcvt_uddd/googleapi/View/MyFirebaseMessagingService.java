@@ -10,17 +10,22 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
-
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
-
-import java.util.Map;
-
 import hvcnbcvt_uddd.googleapi.R;
+import hvcnbcvt_uddd.googleapi.data.api.ApiBuilder;
+import hvcnbcvt_uddd.googleapi.data.api.ApiInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -31,9 +36,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     String phone = "";
     String entityId = "";
 
+    ApiInterface apiInterface;
+
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
+        apiInterface = ApiBuilder.getServiceApi(getApplicationContext());
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
         // Check if message contains a data payload.
@@ -50,10 +58,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             Map data = remoteMessage.getData();
 
-             lat = data.get("latitude").toString();
-             lon = data.get("longitude").toString();
-             phone = data.get("phone").toString();
-             entityId = data.get("entityId").toString();
+            lat = data.get("latitude").toString();
+            lon = data.get("longitude").toString();
+            if (data.get("phone") != null) {
+                phone = data.get("phone").toString();
+            } else {
+                phone = "30330303";
+            }
+            entityId = data.get("entityId").toString();
         }
 
         // Check if message contains a notification payload.
@@ -82,7 +94,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        // TODO: Implement this method to send token to your app server.
+        HashMap<String, String> option = new HashMap<>();
+        option.put("device_token", token);
+        Log.d(TAG, "token: " + token);
+
+        Call call = apiInterface.sendToken(option);
+        call.enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                Log.d(TAG, "onResponse:  send token" + response.message());
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Log.d(TAG, "onFailure:  send token" + t.getMessage());
+            }
+        });
     }
 
     /**

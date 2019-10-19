@@ -49,6 +49,7 @@ dependencies {
 
     //firebase
     implementation 'com.google.firebase:firebase-messaging:20.0.0'
+    implementation 'com.google.firebase:firebase-firestore:21.2.0'
 
     //google
     implementation 'com.google.android.gms:play-services-maps:17.0.0'

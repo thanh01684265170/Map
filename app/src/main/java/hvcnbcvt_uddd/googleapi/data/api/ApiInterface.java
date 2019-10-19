@@ -5,6 +5,7 @@ import java.util.HashMap;
 import hvcnbcvt_uddd.googleapi.Model.BodySendSOS;
 import hvcnbcvt_uddd.googleapi.Model.DataSos;
 import hvcnbcvt_uddd.googleapi.Model.dataloginresponse.LoginResponse;
+import hvcnbcvt_uddd.googleapi.Model.datasosresponse.SosResponse;
 import hvcnbcvt_uddd.googleapi.Model.datauserlistresponse.DataUsersSosResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -27,7 +28,7 @@ public interface ApiInterface {
     Call<DataSos> sendSOS(@Body BodySendSOS bodySendSOS);
 
     @POST("response")
-    Call<LoginResponse> responseSOS(@Body HashMap<String, String> entityId, @Body HashMap<String, Boolean> accept);
+    Call<SosResponse> responseSOS(@Body HashMap<String, String> entityId);
 
     @POST("cancel")
     Call<DataSos> cancelSOS(@Body HashMap<String, String> entityId);

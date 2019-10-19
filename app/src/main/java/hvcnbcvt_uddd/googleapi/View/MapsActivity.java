@@ -196,6 +196,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (lat != null & lon != null) {
             PLACE_YOU_GO = new LatLng(Double.parseDouble(lat), Double.parseDouble(lon));
+
             marker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32))
                     .title(entityId)
@@ -233,7 +234,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             latlngBounds = createLatLngBoundsObject(userLocation, PLACE_YOU_GO);
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
-                    latlngBounds, 800, 500, 50));
+                    latlngBounds, 500, 400, 100));
+
+            findAway(myLocation.getLatitude(), myLocation.getLongitude(),
+                    PLACE_YOU_GO.latitude, PLACE_YOU_GO.longitude);
         }
     }
 
@@ -350,10 +354,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("Mapsll", "Size reDrawMap: " + listUserHelp.size());
         // Hiển thị marker
         for (int i = 0; i < listUserHelp.size(); i++) {
-//            mMap.addMarker(new MarkerOptions().position(new LatLng(listUserHelp.get(i).getLocation().getLatitude(), listUserHelp.get(i).getLocation().getLongitude()))
-//                    .title(arrayMarker.get(i).getTitle()).snippet(arrayMarker.get(i).getSnippet())
-//                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32)));
-
             final LatLng address = new LatLng(listUserHelp.get(i).getLocation().getLatitude(), listUserHelp.get(i).getLocation().getLongitude());
             Glide.with(MapsActivity.this)
                     .asBitmap()
@@ -579,17 +579,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         // Hiển thị marker
-        for (int i = 0; i < arrayMarker.size(); i++) {
-            circle = mMap.addCircle(new CircleOptions()
-                    .center(new LatLng(arrayMarker.get(i).getLatitude(), arrayMarker.get(i).getLongitute()))
-                    .radius(240)
-                    .strokeColor(Color.YELLOW)
-                    .fillColor(Color.argb(100, 255, 0, 0))
-                    .strokeWidth(2));
-            mMap.addMarker(new MarkerOptions().position(new LatLng(arrayMarker.get(i).getLatitude(), arrayMarker.get(i).getLongitute()))
-                    .title(arrayMarker.get(i).getTitle()).snippet(arrayMarker.get(i).getSnippet())
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32)));
-        }
+//        for (int i = 0; i < arrayMarker.size(); i++) {
+//            circle = mMap.addCircle(new CircleOptions()
+//                    .center(new LatLng(arrayMarker.get(i).getLatitude(), arrayMarker.get(i).getLongitute()))
+//                    .radius(240)
+//                    .strokeColor(Color.YELLOW)
+//                    .fillColor(Color.argb(100, 255, 0, 0))
+//                    .strokeWidth(2));
+//            mMap.addMarker(new MarkerOptions().position(new LatLng(arrayMarker.get(i).getLatitude(), arrayMarker.get(i).getLongitute()))
+//                    .title(arrayMarker.get(i).getTitle()).snippet(arrayMarker.get(i).getSnippet())
+//                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_32)));
+//        }
 
         // kết thúc dialog nếu load bản đồ xong
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
